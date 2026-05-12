@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenHerb - Gestão de Cultivo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1>GreenHerb</h1>
+        <form id="formPlano">
+
+            <fieldset>
+                <legend>Informações do Lote</legend>
+                <label for="nomeLote">Nome/ID do lote:</label>
+                <input type="text" id="nomeLote" placeholder="ex: Lote-01" required>
+
+                <label for="estadoLote">Estado Inicial do Lote:</label>
+                <select id="estadoLote">
+                    <option value="ativo">Ativo</option>
+                    <option value="concluido">Concluído</option>
+                    <option value="comprometido">Comprometido</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Plano de Cultivo</legend>
+
+                <label>Erva Aromática:</label>
+                <select id="tipoErva" required>
+                    <option value="manjericao">Manjericão</option>
+                    <option value="hortela">Hortelã</option>
+                    <option value="alecrim">Alecrim</option>
+                    <option value="tomilho">Tomilho</option>
+                </select>
+
+                <label>Tipo de Plano:</label>
+                <select id="tipoPlano" required>
+                    <option value="regular">Regular</option>
+                    <option value="emergencia">Emergência</option>
+                    <option value="pontual">Pontual (Intervenção Única)</option>
+                </select>
+
+                <div id="secaoRegular" class="dynamic-section">
+                    <p><strong>Parâmetros Ideais:</strong></p>
+                    <div class="grid-3">
+                        <input type="number" id="tempIdeal" placeholder="Temp. Ideal (°C)">
+                        <input type="number" id="humIdeal" placeholder="Humidade Ideal (%)">
+                        <input type="number" id="luzIdeal" placeholder="Luz Ideal">
+                    </div>
+                    <input type="text" id="planoRega" placeholder="Plano de Rega (ex: 2x ao dia)">
+                    <input type="number" id="duracaoCiclo" placeholder="Duração prevista (em dias)">
+                </div>
+
+                <div id="secaoEmergencia" class="dynamic-section hidden">
+                    <p><strong>Protocolo de Emergência:</strong></p>
+                    <input type="text" id="tipoPraga" placeholder="Tipo de Praga/Doença">
+                    <input type="text" id="dosagem" placeholder="Dosagem Recomendada">
+                    <input type="number" id="intervaloMin" placeholder="Intervalo Mínimo (horas)">
+                </div>
+
+                <div id="secaoPontual" class="dynamic-section hidden">
+                    <p><strong>Intervenção Única:</strong></p>
+                    <textarea id="obsPontual" placeholder="Justificação da intervenção..."></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Automação e Alertas</legend>
+                <label>Modo de Operação:</label>
+                <div class="radio-group">
+                    <input type="radio" name="modo" value="manual" id="modoManual" checked>
+                    <label for="modoManual" class="inline">Manual</label>
+
+                    <input type="radio" name="modo" value="automatico" id="modoAuto">
+                    <label for="modoAuto" class="inline">Automático</label>
+                </div>
+
+                <label for="classeAlerta">Severidade Padrão de Alertas:</label>
+                <select id="classeAlerta">
+                    <option value="informativo">Informativo</option>
+                    <option value="aviso">Aviso</option>
+                    <option value="critico">Crítico</option>
+                </select>
+            </fieldset>
+
+            <button type="submit">Gravar Configuração</button>
+        </form>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
