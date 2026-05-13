@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  title: GREENHERB API
+  description: API para gestão inteligente de uma estufa de ervas aromáticas
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:3000/api
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Utilizador:
+      type: object
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        perfil:
+          type: string
+          enum: [Tecnico, Responsavel, Administrador]
+
+    ErvaAromatica:
+      type: object
+      properties:
+        nome:
+          type: string
+        descricao:
+          type: string
+        temperaturaMin:
+          type: number
+        temperaturaMax:
+          type: number
+        humidadeMin:
+          type: number
+        humidadeMax:
+          type: number
+        luminosidadeMin:
+          type: number
+        luminosidadeMax:
+          type: number
+
+    PlanoCultivo:
+      type: object
+      properties:
+        tipo:
+          type: string
+          enum: [regular, emergencia, pontual]
+        ervaAromatica:
+          type: string
+        estado:
+          type: string
+          enum: [ativo, concluido, cancelado]
+        temperaturaMin:
+          type: number
+        temperaturaMax:
+          type: number
+        humidadeMin:
+          type: number
+        humidadeMax:
+          type: number
+
+paths:
+  /auth/register:
+    post:
+      summary: Registar utilizador
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Utilizador'
+      responses:
+        '201':
+          description: Utilizador criado com sucesso
+        '400':
+          description: Email já registado
+
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login com sucesso, devolve token JWT
+        '400':
+          description: Email ou password incorretos
+
+  /ervas:
+    get:
+      summary: Listar todas as ervas
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de ervas
+    post:
+      summary: Criar erva
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErvaAromatica'
+      responses:
+        '201':
+          description: Erva criada com sucesso
+        '403':
+          description: Sem permissao
+
+  /ervas/{id}:
+    get:
+      summary: Ver erva por id
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Erva encontrada
+        '404':
+          description: Erva nao encontrada
+    put:
+      summary: Editar erva
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ErvaAromatica'
+      responses:
+        '200':
+          description: Erva atualizada
+        '404':
+          description: Erva nao encontrada
+    delete:
+      summary: Apagar erva
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Erva apagada
+        '404':
+          description: Erva nao encontrada
+
+  /planos:
+    get:
+      summary: Listar todos os planos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de planos
+    post:
+      summary: Criar plano
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanoCultivo'
+      responses:
+        '201':
+          description: Plano criado com sucesso
+        '403':
+          description: Sem permissao
+
+  /planos/{id}:
+    get:
+      summary: Ver plano por id
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Plano encontrado
+        '404':
+          description: Plano nao encontrado
+    put:
+      summary: Editar plano
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanoCultivo'
+      responses:
+        '200':
+          description: Plano atualizado
+        '404':
+          description: Plano nao encontrado
+    delete:
+      summary: Apagar plano
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Plano apagado
+        '404':
+          description: Plano nao encontrado
