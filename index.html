@@ -11,87 +11,145 @@
 <body>
     <div class="container">
         <h1>GreenHerb</h1>
-        <form id="formPlano">
 
+        <div id="blocoLogin">
             <fieldset>
-                <legend>Informações do Lote</legend>
-                <label for="nomeLote">Nome/ID do lote:</label>
-                <input type="text" id="nomeLote" placeholder="ex: Lote-01" required>
-
-                <label for="estadoLote">Estado Inicial do Lote:</label>
-                <select id="estadoLote">
-                    <option value="ativo">Ativo</option>
-                    <option value="concluido">Concluído</option>
-                    <option value="comprometido">Comprometido</option>
-                </select>
+                <legend>Autenticação do Utilizador</legend>
+                <form id="formLogin">
+                    <label for="loginEmail">Email:</label>
+                    <input type="email" id="loginEmail" placeholder="ex: admin@greenherb.com" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    
+                    <label for="loginPassword">Palavra-passe:</label>
+                    <input type="password" id="loginPassword" placeholder="******" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                    
+                    <button type="submit" style="width: 100%; background-color: #2e7d32; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer;">Entrar no Sistema</button>
+                </form>
             </fieldset>
+        </div>
 
-            <fieldset>
-                <legend>Plano de Cultivo</legend>
+        <div id="conteudoApp" class="hidden">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fafafa; padding: 10px 15px; border-radius: 4px; border: 1px solid #c8e6c9;">
+                <span id="saudacaoUser" style="font-weight: bold; color: #2e7d32;">Olá, Utilizador</span>
+                <button id="btnLogout" style="background-color: #c62828; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Sair</button>
+            </div>
 
-                <label>Erva Aromática:</label>
-                <select id="tipoErva" required>
-                    <option value="manjericao">Manjericão</option>
-                    <option value="hortela">Hortelã</option>
-                    <option value="alecrim">Alecrim</option>
-                    <option value="tomilho">Tomilho</option>
-                </select>
+            <div id="blocoCSV" class="hidden">
+                <fieldset style="border-color: #ffa000; background-color: #fffde7;">
+                    <legend style="color: #b71c1c;">Importação em Lote (CSV)</legend>
+                    <form id="formCSV">
+                        <label>Selecione o ficheiro de Ervas (.csv):</label>
+                        <input type="file" id="fileCSV" accept=".csv" required style="margin-bottom: 15px;">
+                        <button type="submit" style="width: 100%; background-color: #ffa000; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Processar e Importar CSV</button>
+                    </form>
+                </fieldset>
+            </div>
 
-                <label>Tipo de Plano:</label>
-                <select id="tipoPlano" required>
-                    <option value="regular">Regular</option>
-                    <option value="emergencia">Emergência</option>
-                    <option value="pontual">Pontual (Intervenção Única)</option>
-                </select>
+            <div id="blocoUsuarios" class="hidden">
+                <fieldset style="border-color: #1976d2; background-color: #e3f2fd;">
+                    <legend style="color: #0d47a1;">Gestão de Utilizadores (Admin)</legend>
+                    <form id="formNovoUsuario">
+                        <label for="regNome">Nome:</label>
+                        <input type="text" id="regNome" placeholder="Nome Completo" required>
+                        
+                        <label for="regEmail">Email:</label>
+                        <input type="email" id="regEmail" placeholder="colaborador@greenherb.com" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        
+                        <label for="regPassword">Palavra-passe:</label>
+                        <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
+                        
+                        <label for="regPerfil">Perfil de Acesso:</label>
+                        <select id="regPerfil" required>
+                            <option value="Técnico">Técnico</option>
+                            <option value="Responsável">Responsável</option>
+                            <option value="Administrador">Administrador</option>
+                        </select>
+                        
+                        <button type="submit" style="width: 100%; background-color: #1976d2; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Registar Colaborador</button>
+                    </form>
+                </fieldset>
+            </div>
 
-                <div id="secaoRegular" class="dynamic-section">
-                    <p><strong>Parâmetros Ideais:</strong></p>
-                    <div class="grid-3">
-                        <input type="number" id="tempIdeal" placeholder="Temp. Ideal (°C)">
-                        <input type="number" id="humIdeal" placeholder="Humidade Ideal (%)">
-                        <input type="number" id="luzIdeal" placeholder="Luz Ideal">
+            <form id="formPlano">
+                <fieldset>
+                    <legend>Informações do Lote</legend>
+                    <label for="nomeLote">Nome/ID do lote:</label>
+                    <input type="text" id="nomeLote" placeholder="ex: Lote-01" required>
+
+                    <label for="estadoLote">Estado Inicial do Lote:</label>
+                    <select id="estadoLote">
+                        <option value="ativo">Ativo</option>
+                        <option value="concluido">Concluído</option>
+                        <option value="comprometido">Comprometido</option>
+                    </select>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Plano de Cultivo</legend>
+
+                    <label>Erva Aromática:</label>
+                    <select id="tipoErva" required>
+                        <option value="manjericao">Manjericão</option>
+                        <option value="hortela">Hortelã</option>
+                        <option value="alecrim">Alecrim</option>
+                        <option value="tomilho">Tomilho</option>
+                    </select>
+
+                    <label>Tipo de Plano:</label>
+                    <select id="tipoPlano" required>
+                        <option value="regular">Regular</option>
+                        <option value="emergencia">Emergência</option>
+                        <option value="pontual">Pontual (Intervenção Única)</option>
+                    </select>
+
+                    <div id="secaoRegular" class="dynamic-section">
+                        <p><strong>Parâmetros Ideais:</strong></p>
+                        <div class="grid-3">
+                            <input type="number" id="tempIdeal" placeholder="Temp. Ideal (°C)">
+                            <input type="number" id="humIdeal" placeholder="Humidade Ideal (%)">
+                            <input type="number" id="luzIdeal" placeholder="Luz Ideal">
+                        </div>
+                        <input type="text" id="planoRega" placeholder="Plano de Rega (ex: 2x ao dia)">
+                        <input type="number" id="duracaoCiclo" placeholder="Duração prevista (em dias)">
                     </div>
-                    <input type="text" id="planoRega" placeholder="Plano de Rega (ex: 2x ao dia)">
-                    <input type="number" id="duracaoCiclo" placeholder="Duração prevista (em dias)">
-                </div>
 
-                <div id="secaoEmergencia" class="dynamic-section hidden">
-                    <p><strong>Protocolo de Emergência:</strong></p>
-                    <input type="text" id="tipoPraga" placeholder="Tipo de Praga/Doença">
-                    <input type="text" id="dosagem" placeholder="Dosagem Recomendada">
-                    <input type="number" id="intervaloMin" placeholder="Intervalo Mínimo (horas)">
-                </div>
+                    <div id="secaoEmergencia" class="dynamic-section hidden">
+                        <p><strong>Protocolo de Emergência:</strong></p>
+                        <input type="text" id="tipoPraga" placeholder="Tipo de Praga/Doença">
+                        <input type="text" id="dosagem" placeholder="Dosagem Recomendada">
+                        <input type="number" id="intervaloMin" placeholder="Intervalo Mínimo (horas)">
+                    </div>
 
-                <div id="secaoPontual" class="dynamic-section hidden">
-                    <p><strong>Intervenção Única:</strong></p>
-                    <textarea id="obsPontual" placeholder="Justificação da intervenção..."></textarea>
-                </div>
-            </fieldset>
+                    <div id="secaoPontual" class="dynamic-section hidden">
+                        <p><strong>Intervenção Única:</strong></p>
+                        <textarea id="obsPontual" placeholder="Justificação da intervenção..."></textarea>
+                    </div>
+                </fieldset>
 
-            <fieldset>
-                <legend>Automação e Alertas</legend>
-                <label>Modo de Operação:</label>
-                <div class="radio-group">
-                    <input type="radio" name="modo" value="manual" id="modoManual" checked>
-                    <label for="modoManual" class="inline">Manual</label>
+                <fieldset>
+                    <legend>Automação e Alertas</legend>
+                    <label>Modo de Operação:</label>
+                    <div class="radio-group">
+                        <input type="radio" name="modo" value="manual" id="modoManual" checked>
+                        <label for="modoManual" class="inline">Manual</label>
 
-                    <input type="radio" name="modo" value="automatico" id="modoAuto">
-                    <label for="modoAuto" class="inline">Automático</label>
-                </div>
+                        <input type="radio" name="modo" value="automatico" id="modoAuto">
+                        <label for="modoAuto" class="inline">Automático</label>
+                    </div>
 
-                <label for="classeAlerta">Severidade Padrão de Alertas:</label>
-                <select id="classeAlerta">
-                    <option value="informativo">Informativo</option>
-                    <option value="aviso">Aviso</option>
-                    <option value="critico">Crítico</option>
-                </select>
-            </fieldset>
+                    <label for="classeAlerta">Severidade Padrão de Alertas:</label>
+                    <select id="classeAlerta">
+                        <option value="informativo">Informativo</option>
+                        <option value="aviso">Aviso</option>
+                        <option value="critico">Crítico</option>
+                    </select>
+                </fieldset>
 
-            <button type="submit">Gravar Configuração</button>
-        </form>
+                <button type="submit">Gravar Configuração</button>
+            </form>
+        </div>
     </div>
 
     <script src="script.js"></script>
 </body>
-
 </html>

@@ -20,7 +20,7 @@ const planoCultivoSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Utilizador'
   },
-  // Campos para plano regular
+  // plano regular
   temperaturaMin: { type: Number },
   temperaturaMax: { type: Number },
   humidadeMin: { type: Number },
@@ -31,12 +31,11 @@ const planoCultivoSchema = new mongoose.Schema({
   fertilizacao: { type: String },
   duracaoCiclo: { type: Number },
 
-  // Campos para plano emergencia
+  // plano emergencia
   intervaloMinIntervencoes: { type: Number },
   tipoIntervencao: { type: String },
   dosagem: { type: String },
 
-  // Estado do plano
   estado: {
     type: String,
     enum: ['ativo', 'concluido', 'cancelado'],

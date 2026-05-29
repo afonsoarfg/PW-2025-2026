@@ -41,7 +41,7 @@ router.post('/', autenticar, async (req, res) => {
       criadoPor: req.utilizador._id
     };
 
-    // Plano pontual precisa de autorização do Responsavel
+    // Plano pontual precisa de autorização
     if (req.body.tipo === 'pontual' && req.utilizador.perfil !== 'Responsavel') {
       return res.status(403).json({ erro: 'Plano pontual precisa de ser criado por um Responsável.' });
     }
@@ -51,9 +51,9 @@ router.post('/', autenticar, async (req, res) => {
     res.status(201).json(plano);
   } catch (err) {
     res.status(500).json({ erro: err.message });
-  }
-});
-
+  } // adicionar a autorizacao no frontend
+});//adicionar/atualizar utilizadores no frontend
+//limites da temperatura
 // PUT /api/planos/:id - editar um plano
 router.put('/:id', autenticar, autorizar('Responsavel', 'Administrador'), async (req, res) => {
   try {

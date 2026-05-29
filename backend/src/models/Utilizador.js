@@ -9,7 +9,7 @@ const utilizadorSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true //sao unicos
+    unique: true 
   },
   password: {
     type: String,
@@ -17,17 +17,15 @@ const utilizadorSchema = new mongoose.Schema({
   },
   perfil: {
     type: String,
-    enum: ['Tecnico', 'Responsavel', 'Administrador'],//so aceita um desses
+    enum: ['Tecnico', 'Responsavel', 'Administrador'],
     default: 'Tecnico'
   }
-}, { timestamps: true });//adiciona automaticamente createdAT(data e hora que o documento foi criado) e updateAT(ultima alteracao) a cada documento
-// Encripta a password antes de guardar
+}, { timestamps: true });
 utilizadorSchema.pre('save', async function() {
   if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-// Método para verificar a password
 utilizadorSchema.methods.verificarPassword = async function(password) {
   return await bcrypt.compare(password, this.password);
 };

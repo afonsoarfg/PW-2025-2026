@@ -14,7 +14,6 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB ligado com sucesso'))
   .catch((err) => console.error('Erro ao ligar ao MongoDB:', err));
 
-// Rotas
 const authRoutes = require('./routes/auth');
 const planosRoutes = require('./routes/planos');
 const ervasRoutes = require('./routes/ervas');

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ervaAromaticaSchema = new mongoose.Schema({ //verifica os dados (define as regras e valida os dados)
+const ervaAromaticaSchema = new mongoose.Schema({ 
   nome: {
     type: String,
     required: true,
@@ -35,4 +35,4 @@ const ervaAromaticaSchema = new mongoose.Schema({ //verifica os dados (define as
   }
 }, { timestamps: true });
 
-module.exports = mongoose.model('ErvaAromatica', ervaAromaticaSchema);//guarda os dados
+module.exports = mongoose.model('ErvaAromatica', ervaAromaticaSchema);
