@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const ErvaAromatica = require('../models/ErvaAromatica');
 const { autenticar, autorizar } = require('../middleware/auth');
+const registarLog = require('../middleware/audit');
 
 const path = require('path');
 const multer = require('multer');
@@ -10,6 +11,7 @@ const fs = require('fs');
 
 const upload = multer({ dest: 'uploads/' });
 
+// GET /api/ervas - ver todas as ervas
 router.get('/', autenticar, async (req, res) => {
   try {
     const ervas = await ErvaAromatica.find();
@@ -19,6 +21,7 @@ router.get('/', autenticar, async (req, res) => {
   }
 });
 
+// GET /api/ervas/:id - ver uma erva específica
 router.get('/:id', autenticar, async (req, res) => {
   try {
     const erva = await ErvaAromatica.findById(req.params.id);
@@ -31,18 +34,21 @@ router.get('/:id', autenticar, async (req, res) => {
   }
 });
 
-// adicionar  /api/ervas (Apenas Administrador)
+// POST /api/ervas - adicionar erva (só Administrador)
 router.post('/', autenticar, autorizar('Administrador'), async (req, res) => {
   try {
     const erva = new ErvaAromatica(req.body);
     await erva.save();
+
+    await registarLog(req.utilizador._id, 'CRIAR', 'ErvaAromatica', erva._id.toString(), `Erva criada: ${erva.nome}`);
+
     res.status(201).json(erva);
   } catch (err) {
     res.status(500).json({ erro: err.message });
   }
 });
 
-// editar  /api/ervas/:id (Apenas Administrador)
+// PUT /api/ervas/:id - editar erva (só Administrador)
 router.put('/:id', autenticar, autorizar('Administrador'), async (req, res) => {
   try {
     const erva = await ErvaAromatica.findByIdAndUpdate(
@@ -53,27 +59,33 @@ router.put('/:id', autenticar, autorizar('Administrador'), async (req, res) => {
     if (!erva) {
       return res.status(404).json({ erro: 'Erva não encontrada.' });
     }
+
+    await registarLog(req.utilizador._id, 'EDITAR', 'ErvaAromatica', erva._id.toString(), `Erva editada: ${erva.nome}`);
+
     res.json(erva);
   } catch (err) {
     res.status(500).json({ erro: err.message });
   }
 });
 
-// remover  /api/ervas/:id (Apenas Administrador)
+// DELETE /api/ervas/:id - remover erva (só Administrador)
 router.delete('/:id', autenticar, autorizar('Administrador'), async (req, res) => {
   try {
     const erva = await ErvaAromatica.findByIdAndDelete(req.params.id);
     if (!erva) {
       return res.status(404).json({ erro: 'Erva não encontrada.' });
     }
+
+    await registarLog(req.utilizador._id, 'APAGAR', 'ErvaAromatica', req.params.id, `Erva apagada: ${erva.nome}`);
+
     res.json({ mensagem: 'Erva aromática eliminada com sucesso.' });
   } catch (err) {
     res.status(500).json({ erro: err.message });
   }
 });
 
-
-router.post('/importar', autenticar, autorizar('Administrador', 'Responsável'), upload.single('file'), (req, res) => {
+// POST /api/ervas/importar - importar ervas via CSV (Administrador ou Responsável)
+router.post('/importar', autenticar, autorizar('Administrador', 'Responsavel'), upload.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ erro: 'Por favor, anexe um ficheiro CSV.' });
   }
@@ -112,16 +124,7 @@ router.post('/importar', autenticar, autorizar('Administrador', 'Responsável'),
         return;
       }
 
-      resultados.push({
-        nome,
-        descricao,
-        temperaturaMin,
-        temperaturaMax,
-        humidadeMin,
-        humidadeMax,
-        luminosidadeMin,
-        luminosidadeMax
-      });
+      resultados.push({ nome, descricao, temperaturaMin, temperaturaMax, humidadeMin, humidadeMax, luminosidadeMin, luminosidadeMax });
     })
     .on('end', async () => {
       try {
@@ -133,7 +136,16 @@ router.post('/importar', autenticar, autorizar('Administrador', 'Responsável'),
           throw new Error('O ficheiro CSV contém demasiados registos. O limite é 200 linhas.');
         }
 
-        await ErvaAromatica.insertMany(resultados, { ordered: false });
+        const operacoes = resultados.map(erva => ({
+          updateOne: {
+            filter: { nome: erva.nome },
+            update: { $set: erva },
+            upsert: true
+          }
+        }));
+        await ErvaAromatica.bulkWrite(operacoes);
+
+        await registarLog(req.utilizador._id, 'IMPORTAR', 'ErvaAromatica', null, `Importação CSV: ${resultados.length} ervas importadas`);
 
         if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
         res.json({ mensagem: `Sucesso! Foram importadas ${resultados.length} novas plantas via CSV.` });

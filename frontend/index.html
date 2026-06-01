@@ -17,23 +17,22 @@
                 <legend>Autenticação do Utilizador</legend>
                 <form id="formLogin">
                     <label for="loginEmail">Email:</label>
-                    <input type="email" id="loginEmail" placeholder="ex: admin@greenherb.com" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                    
+                    <input type="email" id="loginEmail" placeholder="ex: admin@greenherb.com" required>
                     <label for="loginPassword">Palavra-passe:</label>
-                    <input type="password" id="loginPassword" placeholder="******" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                    
-                    <button type="submit" style="width: 100%; background-color: #2e7d32; color: white; padding: 15px; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer;">Entrar no Sistema</button>
+                    <input type="password" id="loginPassword" placeholder="******" required>
+                    <button type="submit">Entrar no Sistema</button>
                 </form>
             </fieldset>
         </div>
 
         <div id="conteudoApp" class="hidden">
-            
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fafafa; padding: 10px 15px; border-radius: 4px; border: 1px solid #c8e6c9;">
                 <span id="saudacaoUser" style="font-weight: bold; color: #2e7d32;">Olá, Utilizador</span>
                 <button id="btnLogout" style="background-color: #c62828; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Sair</button>
             </div>
 
+            <!-- Importação CSV -->
             <div id="blocoCSV" class="hidden">
                 <fieldset style="border-color: #ffa000; background-color: #fffde7;">
                     <legend style="color: #b71c1c;">Importação em Lote (CSV)</legend>
@@ -45,55 +44,77 @@
                 </fieldset>
             </div>
 
+            <!-- Gestão de Utilizadores -->
             <div id="blocoUsuarios" class="hidden">
                 <fieldset style="border-color: #1976d2; background-color: #e3f2fd;">
                     <legend style="color: #0d47a1;">Gestão de Utilizadores (Admin)</legend>
                     <form id="formNovoUsuario">
                         <label for="regNome">Nome:</label>
                         <input type="text" id="regNome" placeholder="Nome Completo" required>
-                        
                         <label for="regEmail">Email:</label>
-                        <input type="email" id="regEmail" placeholder="colaborador@greenherb.com" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        
+                        <input type="email" id="regEmail" placeholder="colaborador@greenherb.com" required>
                         <label for="regPassword">Palavra-passe:</label>
-                        <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" required style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
-                        
+                        <input type="password" id="regPassword" placeholder="Mínimo 6 caracteres" required>
                         <label for="regPerfil">Perfil de Acesso:</label>
                         <select id="regPerfil" required>
-                            <option value="Técnico">Técnico</option>
-                            <option value="Responsável">Responsável</option>
+                            <option value="Tecnico">Técnico</option>
+                            <option value="Responsavel">Responsável</option>
                             <option value="Administrador">Administrador</option>
                         </select>
-                        
                         <button type="submit" style="width: 100%; background-color: #1976d2; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Registar Colaborador</button>
                     </form>
                 </fieldset>
             </div>
 
-            <form id="formPlano">
-                <fieldset>
-                    <legend>Informações do Lote</legend>
-                    <label for="nomeLote">Nome/ID do lote:</label>
-                    <input type="text" id="nomeLote" placeholder="ex: Lote-01" required>
-
-                    <label for="estadoLote">Estado Inicial do Lote:</label>
-                    <select id="estadoLote">
-                        <option value="ativo">Ativo</option>
-                        <option value="concluido">Concluído</option>
-                        <option value="comprometido">Comprometido</option>
-                    </select>
+            <!-- Lista de utilizadores -->
+            <div id="blocoListaUtilizadores" class="hidden">
+                <fieldset style="border-color: #1976d2; background-color: #e3f2fd;">
+                    <legend style="color: #0d47a1;">Lista de Utilizadores</legend>
+                    <button onclick="carregarUtilizadores()" style="background-color: #1976d2; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Atualizar Lista</button>
+                    <div id="listaUtilizadores"></div>
                 </fieldset>
+            </div>
 
-                <fieldset>
-                    <legend>Plano de Cultivo</legend>
+            <!-- Planos pontuais pendentes -->
+            <div id="blocoPlanosPendentes" class="hidden">
+                <fieldset style="border-color: #f57c00; background-color: #fff3e0;">
+                    <legend style="color: #e65100;">Planos Pontuais Pendentes</legend>
+                    <button onclick="carregarPlanosPendentes()" style="background-color: #f57c00; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Atualizar Lista</button>
+                    <div id="listaPlanosPendentes"></div>
+                </fieldset>
+            </div>
 
+            <!-- Lista de todos os planos - Admin e Responsável -->
+            <div id="blocoListaPlanos" class="hidden">
+                <fieldset style="border-color: #2e7d32; background-color: #f1f8e9; margin-bottom: 20px;">
+                    <legend style="color: #1b5e20;">Planos Regulares</legend>
+                    <button onclick="carregarTodosPlanos()" style="background-color: #2e7d32; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Atualizar Lista</button>
+                    <div id="listaplanosRegulares"></div>
+                </fieldset>
+                <fieldset style="border-color: #c62828; background-color: #ffebee; margin-bottom: 20px;">
+                    <legend style="color: #b71c1c;">Planos de Emergência</legend>
+                    <div id="listaplanosEmergencia"></div>
+                </fieldset>
+            </div>
+
+            <!-- Logs de Auditoria - só Admin -->
+            <div id="blocoLogs" class="hidden">
+                <fieldset style="border-color: #37474f; background-color: #eceff1; margin-bottom: 20px;">
+                    <legend style="color: #263238;">Logs de Auditoria (Admin)</legend>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button onclick="carregarLogs()" style="background-color: #37474f; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Atualizar Lista</button>
+                        <button onclick="exportarLogs()" style="background-color: #2e7d32; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Exportar CSV</button>
+                    </div>
+                    <div id="listaLogs"></div>
+                </fieldset>
+            </div>
+
+            <!-- Criar Plano de Cultivo -->
+            <fieldset style="border-color: #2e7d32; background-color: #f1f8e9;">
+                <legend style="color: #1b5e20;">Criar Plano de Cultivo</legend>
+                <form id="formPlano">
                     <label>Erva Aromática:</label>
-                    <select id="tipoErva" required>
-                        <option value="manjericao">Manjericão</option>
-                        <option value="hortela">Hortelã</option>
-                        <option value="alecrim">Alecrim</option>
-                        <option value="tomilho">Tomilho</option>
-                    </select>
+                    <select id="tipoErva" required></select>
 
                     <label>Tipo de Plano:</label>
                     <select id="tipoPlano" required>
@@ -105,12 +126,35 @@
                     <div id="secaoRegular" class="dynamic-section">
                         <p><strong>Parâmetros Ideais:</strong></p>
                         <div class="grid-3">
-                            <input type="number" id="tempIdeal" placeholder="Temp. Ideal (°C)">
-                            <input type="number" id="humIdeal" placeholder="Humidade Ideal (%)">
-                            <input type="number" id="luzIdeal" placeholder="Luz Ideal">
+                            <div>
+                                <label>Temp. Mín (°C):</label>
+                                <input type="number" id="tempMin" placeholder="ex: 15">
+                            </div>
+                            <div>
+                                <label>Temp. Máx (°C):</label>
+                                <input type="number" id="tempMax" placeholder="ex: 25">
+                            </div>
+                            <div>
+                                <label>Humidade Mín (%):</label>
+                                <input type="number" id="humMin" placeholder="ex: 60">
+                            </div>
+                        </div>
+                        <div class="grid-3">
+                            <div>
+                                <label>Humidade Máx (%):</label>
+                                <input type="number" id="humMax" placeholder="ex: 80">
+                            </div>
+                            <div>
+                                <label>Luz Mín (lux):</label>
+                                <input type="number" id="luzMin" placeholder="ex: 400">
+                            </div>
+                            <div>
+                                <label>Luz Máx (lux):</label>
+                                <input type="number" id="luzMax" placeholder="ex: 700">
+                            </div>
                         </div>
                         <input type="text" id="planoRega" placeholder="Plano de Rega (ex: 2x ao dia)">
-                        <input type="number" id="duracaoCiclo" placeholder="Duração prevista (em dias)">
+                        <input type="number" id="duracaoCiclo" placeholder="Duração prevista (dias)">
                     </div>
 
                     <div id="secaoEmergencia" class="dynamic-section hidden">
@@ -124,29 +168,108 @@
                         <p><strong>Intervenção Única:</strong></p>
                         <textarea id="obsPontual" placeholder="Justificação da intervenção..."></textarea>
                     </div>
-                </fieldset>
 
-                <fieldset>
-                    <legend>Automação e Alertas</legend>
                     <label>Modo de Operação:</label>
                     <div class="radio-group">
                         <input type="radio" name="modo" value="manual" id="modoManual" checked>
                         <label for="modoManual" class="inline">Manual</label>
-
                         <input type="radio" name="modo" value="automatico" id="modoAuto">
                         <label for="modoAuto" class="inline">Automático</label>
                     </div>
 
                     <label for="classeAlerta">Severidade Padrão de Alertas:</label>
                     <select id="classeAlerta">
-                        <option value="informativo">Informativo</option>
-                        <option value="aviso">Aviso</option>
-                        <option value="critico">Crítico</option>
+                        <option value="Informativo">Informativo</option>
+                        <option value="Aviso">Aviso</option>
+                        <option value="Critico">Crítico</option>
                     </select>
-                </fieldset>
 
-                <button type="submit">Gravar Configuração</button>
-            </form>
+                    <button type="submit" style="width: 100%; background-color: #2e7d32; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Criar Plano</button>
+                </form>
+            </fieldset>
+
+            <!-- Criar Lote de Cultivo -->
+            <fieldset style="border-color: #558b2f; background-color: #f9fbe7; margin-top: 20px;">
+                <legend style="color: #33691e;">Criar Lote de Cultivo</legend>
+                <form id="formLote">
+                    <label for="nomeLote">Nome do Lote:</label>
+                    <input type="text" id="nomeLote" placeholder="ex: Lote-01" required>
+                    <label for="ervaLote">Erva Aromática:</label>
+                    <select id="ervaLote" required></select>
+                    <label for="planoLote">Plano de Cultivo:</label>
+                    <select id="planoLote" required></select>
+                    <label for="quantidadeInicial">Quantidade Inicial (plantas):</label>
+                    <input type="number" id="quantidadeInicial" placeholder="ex: 50" required>
+                    <label for="notasLote">Notas:</label>
+                    <textarea id="notasLote" placeholder="Observações sobre este lote..."></textarea>
+                    <button type="submit" style="width: 100%; background-color: #558b2f; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Criar Lote</button>
+                </form>
+            </fieldset>
+
+            <!-- Lista de Lotes -->
+            <fieldset style="border-color: #558b2f; background-color: #f9fbe7; margin-top: 20px;">
+                <legend style="color: #33691e;">Lotes de Cultivo</legend>
+                <button onclick="carregarLotes()" style="background-color: #558b2f; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Atualizar Lista</button>
+                <div id="listaLotes"></div>
+            </fieldset>
+
+            <!-- Criar Tarefa Operacional -->
+            <fieldset style="border-color: #00796b; background-color: #e0f2f1; margin-top: 20px;">
+                <legend style="color: #004d40;">Criar Tarefa Operacional</legend>
+                <form id="formTarefa">
+                    <label for="loteTarefa">Lote:</label>
+                    <select id="loteTarefa" required></select>
+                    <label for="tipoTarefa">Tipo de Tarefa:</label>
+                    <select id="tipoTarefa" required>
+                        <option value="rega">Rega</option>
+                        <option value="fertilizacao">Fertilização</option>
+                        <option value="colheita">Colheita</option>
+                        <option value="monitorizacao">Monitorização</option>
+                    </select>
+                    <label for="descricaoTarefa">Descrição:</label>
+                    <textarea id="descricaoTarefa" placeholder="Descrição da tarefa..."></textarea>
+                    <button type="submit" style="width: 100%; background-color: #00796b; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Criar Tarefa</button>
+                </form>
+            </fieldset>
+
+            <!-- Lista de Tarefas Pendentes -->
+            <fieldset style="border-color: #00796b; background-color: #e0f2f1; margin-top: 20px;">
+                <legend style="color: #004d40;">Tarefas Pendentes</legend>
+                <button onclick="carregarTarefasPendentes()" style="background-color: #00796b; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Atualizar Lista</button>
+                <div id="listaTarefasPendentes"></div>
+            </fieldset>
+
+            <!-- Registar Medição Ambiental -->
+            <fieldset style="border-color: #6a1b9a; background-color: #f3e5f5; margin-top: 20px;">
+                <legend style="color: #4a148c;">Registar Medição Ambiental</legend>
+                <form id="formMedicao">
+                    <label for="loteMedicao">Lote:</label>
+                    <select id="loteMedicao" required></select>
+                    <div class="grid-3">
+                        <div>
+                            <label for="temperatura">Temperatura (°C):</label>
+                            <input type="number" id="temperatura" placeholder="ex: 22" required>
+                        </div>
+                        <div>
+                            <label for="humidade">Humidade (%):</label>
+                            <input type="number" id="humidade" placeholder="ex: 65" required>
+                        </div>
+                        <div>
+                            <label for="luminosidade">Luminosidade (lux):</label>
+                            <input type="number" id="luminosidade" placeholder="ex: 500" required>
+                        </div>
+                    </div>
+                    <button type="submit" style="width: 100%; background-color: #6a1b9a; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer;">Registar Medição</button>
+                </form>
+            </fieldset>
+
+            <!-- Alertas Ativos -->
+            <fieldset style="border-color: #c62828; background-color: #ffebee; margin-top: 20px;">
+                <legend style="color: #b71c1c;">Alertas Ativos</legend>
+                <button onclick="carregarAlertas()" style="background-color: #c62828; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">Atualizar Lista</button>
+                <div id="listaAlertas"></div>
+            </fieldset>
+
         </div>
     </div>
 

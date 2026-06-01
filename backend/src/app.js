@@ -17,10 +17,21 @@ mongoose.connect(process.env.MONGODB_URI)
 const authRoutes = require('./routes/auth');
 const planosRoutes = require('./routes/planos');
 const ervasRoutes = require('./routes/ervas');
+const lotesRoutes = require('./routes/lotes');
+const tarefasRoutes = require('./routes/tarefas');
+const medicoesRoutes = require('./routes/medicoes');
+const alertasRoutes = require('./routes/alertas');
+const logsRoutes = require('./routes/logs');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/planos', planosRoutes);
 app.use('/api/ervas', ervasRoutes);
+app.use('/api/lotes', lotesRoutes);
+app.use('/api/tarefas', tarefasRoutes);
+app.use('/api/medicoes', medicoesRoutes);
+app.use('/api/alertas', alertasRoutes);
+app.use('/api/logs', logsRoutes);
+
 
 app.get('/', (req, res) => {
   res.json({ mensagem: 'API GREENHERB a funcionar!' });

@@ -38,7 +38,7 @@ const planoCultivoSchema = new mongoose.Schema({
 
   estado: {
     type: String,
-    enum: ['ativo', 'concluido', 'cancelado'],
+    enum: ['ativo', 'concluido', 'cancelado','pendente'],
     default: 'ativo'
   },
   dataInicio: { type: Date, default: Date.now },

@@ -1,4 +1,13 @@
 nome,descricao,temperaturaMin,temperaturaMax,humidadeMin,humidadeMax,luminosidadeMin,luminosidadeMax
-Coentros do Horto,Muito aromáticos e sensíveis,15,25,60,80,400,700
-Manjericao Italiano,Gosta de calor e sol direto,18,32,55,75,500,900
+Coentros do Horto,Muito aromáticos e sensíveis ao calor,15,25,60,80,400,700
+Manjericao Italiano,Gosta de calor e sol direto intenso,18,32,55,75,500,900
 Alecrim Cascata,Resistente e precisa de pouca água,10,30,40,65,600,950
+Hortelã Piperita,Prefere ambientes frescos e húmidos,10,22,65,85,300,600
+Tomilho Comum,Mediterrâneo resistente a secas,8,28,35,60,550,900
+Salvia Officinalis,Aromática robusta de folha cinzenta,10,28,40,65,500,850
+Cebolinho,Cresce bem em vasos com pouca luz,10,24,55,80,250,550
+Estragão Francês,Sensível ao frio e ao excesso de água,15,28,45,70,450,800
+Lavanda Angustifolia,Muito resistente a altas temperaturas,5,30,30,55,600,1000
+Oregão Grego,Intensamente aromático e resistente,10,30,35,60,550,950
+Erva-Príncipe,Tropical sensível ao frio,18,35,60,85,400,750
+Funcho Doce,Cresce alto e precisa de espaço,10,25,50,75,400,700

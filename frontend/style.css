@@ -51,6 +51,8 @@ label {
 
 input[type="text"],
 input[type="number"],
+input[type="email"],
+input[type="password"],
 select,
 textarea {
     width: 100%;
@@ -116,7 +118,7 @@ textarea {
 }
 
 button[type="submit"] {
-    width: 100%;
+    width: 100%; 
     background-color: #2e7d32;
     color: white;
     padding: 15px;
