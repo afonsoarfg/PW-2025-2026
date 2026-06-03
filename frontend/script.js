@@ -24,12 +24,21 @@ tipoPlano.addEventListener('change', () => {
     if (secoes[selecionada]) secoes[selecionada].classList.remove('hidden');
 });
 
+// Abre a IndexedDB com versão 2 para suportar medições e tarefas offline
 let db;
-let request = indexedDB.open("GreenHerbDB", 1);
+let request = indexedDB.open("GreenHerbDB", 2);
 
 request.onupgradeneeded = function (event) {
     db = event.target.result;
-    db.createObjectStore("planos", { keyPath: "id" });
+    if (!db.objectStoreNames.contains('planos')) {
+        db.createObjectStore("planos", { keyPath: "id" });
+    }
+    if (!db.objectStoreNames.contains('medicoesPendentes')) {
+        db.createObjectStore("medicoesPendentes", { autoIncrement: true, keyPath: "id" });
+    }
+    if (!db.objectStoreNames.contains('tarefasPendentes')) {
+        db.createObjectStore("tarefasPendentes", { autoIncrement: true, keyPath: "id" });
+    }
     console.log("Estrutura da IndexedDB criada/atualizada");
 };
 
@@ -38,6 +47,142 @@ request.onsuccess = function (event) {
     console.log("Conexão com IndexedDB estabelecida");
     verificarEstadoSessao();
 };
+
+request.onerror = function (event) {
+    console.error("Erro ao abrir IndexedDB:", event.target.error);
+};
+
+// Guarda uma medição pendente na IndexedDB quando não há internet
+function guardarMedicaoPendente(dados) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('medicoesPendentes', 'readwrite');
+        const store = tx.objectStore('medicoesPendentes');
+        const req = store.add({ ...dados, timestamp: new Date().toISOString() });
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+    });
+}
+
+// Guarda uma tarefa pendente na IndexedDB quando não há internet
+function guardarTarefaPendente(dados) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('tarefasPendentes', 'readwrite');
+        const store = tx.objectStore('tarefasPendentes');
+        const req = store.add({ ...dados, timestamp: new Date().toISOString() });
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+    });
+}
+
+// Lê todas as medições pendentes da IndexedDB
+function lerMedicoesPendentes() {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('medicoesPendentes', 'readonly');
+        const store = tx.objectStore('medicoesPendentes');
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+}
+
+// Lê todas as tarefas pendentes da IndexedDB
+function lerTarefasPendentes() {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('tarefasPendentes', 'readonly');
+        const store = tx.objectStore('tarefasPendentes');
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+    });
+}
+
+// Apaga uma medição pendente da IndexedDB depois de sincronizar
+function apagarMedicaoPendente(id) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('medicoesPendentes', 'readwrite');
+        const store = tx.objectStore('medicoesPendentes');
+        const req = store.delete(id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+    });
+}
+
+// Apaga uma tarefa pendente da IndexedDB depois de sincronizar
+function apagarTarefaPendente(id) {
+    return new Promise((resolve, reject) => {
+        const tx = db.transaction('tarefasPendentes', 'readwrite');
+        const store = tx.objectStore('tarefasPendentes');
+        const req = store.delete(id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+    });
+}
+
+// Sincroniza as operações pendentes com a API quando a internet voltar
+async function sincronizarPendentes() {
+    if (!navigator.onLine) return;
+
+    const medicoes = await lerMedicoesPendentes();
+    for (const m of medicoes) {
+        try {
+            const response = await fetch(`${API_URL}/medicoes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    loteCultivo: m.loteCultivo,
+                    temperatura: m.temperatura,
+                    humidade: m.humidade,
+                    luminosidade: m.luminosidade
+                })
+            });
+            if (response.ok) {
+                await apagarMedicaoPendente(m.id);
+                console.log('[SYNC] Medição sincronizada:', m.id);
+            }
+        } catch (err) {
+            console.error('[SYNC] Erro ao sincronizar medição:', err);
+        }
+    }
+
+    const tarefas = await lerTarefasPendentes();
+    for (const t of tarefas) {
+        try {
+            const response = await fetch(`${API_URL}/tarefas`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    loteCultivo: t.loteCultivo,
+                    tipo: t.tipo,
+                    descricao: t.descricao
+                })
+            });
+            if (response.ok) {
+                await apagarTarefaPendente(t.id);
+                console.log('[SYNC] Tarefa sincronizada:', t.id);
+            }
+        } catch (err) {
+            console.error('[SYNC] Erro ao sincronizar tarefa:', err);
+        }
+    }
+
+    if (medicoes.length > 0 || tarefas.length > 0) {
+        alert(`Sincronização concluída! ${medicoes.length} medição(ões) e ${tarefas.length} tarefa(s) enviadas.`);
+        carregarAlertas();
+        carregarTarefasPendentes();
+    }
+}
+
+// Deteta quando a internet volta e sincroniza automaticamente
+window.addEventListener('online', () => {
+    console.log('[INFO] Internet restabelecida - a sincronizar...');
+    sincronizarPendentes();
+});
 
 function verificarEstadoSessao() {
     const blocoLogin = document.getElementById('blocoLogin');
@@ -80,7 +225,6 @@ function verificarEstadoSessao() {
             blocoListaUtilizadores.classList.add('hidden');
             blocoListaPlanos.classList.remove('hidden');
             document.getElementById('blocoLogs').classList.add('hidden');
-
             carregarPlanosPendentes();
             carregarTodosPlanos();
         } else {
@@ -90,7 +234,6 @@ function verificarEstadoSessao() {
             blocoListaUtilizadores.classList.add('hidden');
             blocoListaPlanos.classList.add('hidden');
             document.getElementById('blocoLogs').classList.add('hidden');
-
         }
     } else {
         blocoLogin.classList.remove('hidden');
@@ -717,11 +860,19 @@ async function carregarLotesSelect() {
     }
 }
 
+// Cria uma tarefa - se offline guarda na IndexedDB, se online envia para a API
 document.getElementById('formTarefa').addEventListener('submit', async (e) => {
     e.preventDefault();
     const loteCultivo = document.getElementById('loteTarefa').value;
     const tipo = document.getElementById('tipoTarefa').value;
     const descricao = document.getElementById('descricaoTarefa').value;
+
+    if (!navigator.onLine) {
+        await guardarTarefaPendente({ loteCultivo, tipo, descricao });
+        alert('Sem internet! Tarefa guardada localmente. Será enviada quando a ligação for restabelecida.');
+        document.getElementById('formTarefa').reset();
+        return;
+    }
 
     try {
         const response = await fetch(`${API_URL}/tarefas`, {
@@ -804,12 +955,20 @@ async function carregarLotesMedicao() {
     }
 }
 
+// Regista uma medição - se offline guarda na IndexedDB, se online envia para a API
 document.getElementById('formMedicao').addEventListener('submit', async (e) => {
     e.preventDefault();
     const loteCultivo = document.getElementById('loteMedicao').value;
     const temperatura = Number(document.getElementById('temperatura').value);
     const humidade = Number(document.getElementById('humidade').value);
     const luminosidade = Number(document.getElementById('luminosidade').value);
+
+    if (!navigator.onLine) {
+        await guardarMedicaoPendente({ loteCultivo, temperatura, humidade, luminosidade });
+        alert('Sem internet! Medição guardada localmente. Será enviada quando a ligação for restabelecida.');
+        document.getElementById('formMedicao').reset();
+        return;
+    }
 
     try {
         const response = await fetch(`${API_URL}/medicoes`, {

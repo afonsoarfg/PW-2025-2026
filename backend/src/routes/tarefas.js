@@ -17,7 +17,7 @@ router.get('/', autenticar, async (req, res) => {
   }
 });
 
-// GET /api/tarefas/pendentes - ver tarefas pendentes
+// GET /api/tarefas/pendentes - ver tarefas pendentes (frontend ainda so usa este)
 router.get('/pendentes', autenticar, async (req, res) => {
   try {
     const tarefas = await Tarefa.find({ estado: 'pendente' })

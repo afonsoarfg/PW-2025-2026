@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
   title: GREENHERB API
-  description: API para gestão inteligente de uma estufa de ervas aromáticas
-  version: 1.0.0
+  description: API para gestao inteligente de uma estufa de ervas aromaticas
+  version: 2.0.0
 
 servers:
   - url: http://localhost:3000/api
@@ -59,6 +59,12 @@ components:
         estado:
           type: string
           enum: [ativo, pendente, concluido, cancelado]
+        modo:
+          type: string
+          enum: [manual, automatico]
+        classeAlerta:
+          type: string
+          enum: [Informativo, Aviso, Critico]
         temperaturaMin:
           type: number
         temperaturaMax:
@@ -67,11 +73,121 @@ components:
           type: number
         humidadeMax:
           type: number
+        luminosidadeMin:
+          type: number
+        luminosidadeMax:
+          type: number
+        planoRega:
+          type: string
+        duracaoCiclo:
+          type: number
+        tipoIntervencao:
+          type: string
+        dosagem:
+          type: string
+        intervaloMinIntervencoes:
+          type: number
+
+    LoteCultivo:
+      type: object
+      properties:
+        nome:
+          type: string
+        estado:
+          type: string
+          enum: [ativo, concluido, comprometido]
+        ervaAromatica:
+          type: string
+        planoCultivo:
+          type: string
+        quantidadeInicial:
+          type: number
+        quantidadeFinal:
+          type: number
+        perdas:
+          type: number
+        notas:
+          type: string
+        dataInicio:
+          type: string
+          format: date-time
+        dataFim:
+          type: string
+          format: date-time
+
+    Tarefa:
+      type: object
+      properties:
+        loteCultivo:
+          type: string
+        tipo:
+          type: string
+          enum: [rega, fertilizacao, colheita, monitorizacao]
+        estado:
+          type: string
+          enum: [pendente, executada]
+        descricao:
+          type: string
+        dataExecucao:
+          type: string
+          format: date-time
+
+    MedicaoAmbiental:
+      type: object
+      properties:
+        loteCultivo:
+          type: string
+        temperatura:
+          type: number
+        humidade:
+          type: number
+        luminosidade:
+          type: number
+
+    Alerta:
+      type: object
+      properties:
+        loteCultivo:
+          type: string
+        tipo:
+          type: string
+          enum: [temperatura, humidade, luminosidade, sensor]
+        mensagem:
+          type: string
+        severidade:
+          type: string
+          enum: [Informativo, Aviso, Critico]
+        estado:
+          type: string
+          enum: [ativo, resolvido, ignorado]
+        justificacao:
+          type: string
+
+    LogAuditoria:
+      type: object
+      properties:
+        utilizador:
+          type: string
+        acao:
+          type: string
+        entidade:
+          type: string
+        entidadeId:
+          type: string
+        detalhes:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
 
 paths:
+
+  # ───── AUTH ─────
+
   /auth/register:
     post:
       summary: Registar utilizador
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -82,11 +198,12 @@ paths:
         '201':
           description: Utilizador criado com sucesso
         '400':
-          description: Email já registado
+          description: Email ja registado
 
   /auth/login:
     post:
       summary: Login
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -106,7 +223,8 @@ paths:
 
   /auth/utilizadores:
     get:
-      summary: Listar todos os utilizadores
+      summary: Listar todos os utilizadores (so Administrador)
+      tags: [Auth]
       security:
         - bearerAuth: []
       responses:
@@ -115,7 +233,8 @@ paths:
         '403':
           description: Sem permissao
     post:
-      summary: Criar utilizador (só Administrador)
+      summary: Criar utilizador (so Administrador)
+      tags: [Auth]
       security:
         - bearerAuth: []
       requestBody:
@@ -132,7 +251,8 @@ paths:
 
   /auth/utilizadores/{id}:
     put:
-      summary: Atualizar perfil de utilizador
+      summary: Atualizar perfil de utilizador (so Administrador)
+      tags: [Auth]
       security:
         - bearerAuth: []
       parameters:
@@ -157,7 +277,8 @@ paths:
         '404':
           description: Utilizador nao encontrado
     delete:
-      summary: Eliminar utilizador
+      summary: Eliminar utilizador (so Administrador)
+      tags: [Auth]
       security:
         - bearerAuth: []
       parameters:
@@ -172,16 +293,20 @@ paths:
         '404':
           description: Utilizador nao encontrado
 
+  # ───── ERVAS ─────
+
   /ervas:
     get:
       summary: Listar todas as ervas
+      tags: [Ervas]
       security:
         - bearerAuth: []
       responses:
         '200':
           description: Lista de ervas
     post:
-      summary: Criar erva
+      summary: Criar erva (so Administrador)
+      tags: [Ervas]
       security:
         - bearerAuth: []
       requestBody:
@@ -198,7 +323,8 @@ paths:
 
   /ervas/importar:
     post:
-      summary: Importar ervas via CSV
+      summary: Importar ervas via CSV (Administrador ou Responsavel)
+      tags: [Ervas]
       security:
         - bearerAuth: []
       requestBody:
@@ -222,6 +348,7 @@ paths:
   /ervas/{id}:
     get:
       summary: Ver erva por id
+      tags: [Ervas]
       security:
         - bearerAuth: []
       parameters:
@@ -236,7 +363,8 @@ paths:
         '404':
           description: Erva nao encontrada
     put:
-      summary: Editar erva
+      summary: Editar erva (so Administrador)
+      tags: [Ervas]
       security:
         - bearerAuth: []
       parameters:
@@ -257,7 +385,8 @@ paths:
         '404':
           description: Erva nao encontrada
     delete:
-      summary: Apagar erva
+      summary: Apagar erva (so Administrador)
+      tags: [Ervas]
       security:
         - bearerAuth: []
       parameters:
@@ -272,16 +401,20 @@ paths:
         '404':
           description: Erva nao encontrada
 
+  # ───── PLANOS ─────
+
   /planos:
     get:
       summary: Listar todos os planos
+      tags: [Planos]
       security:
         - bearerAuth: []
       responses:
         '200':
           description: Lista de planos
     post:
-      summary: Criar plano
+      summary: Criar plano de cultivo
+      tags: [Planos]
       security:
         - bearerAuth: []
       requestBody:
@@ -293,12 +426,13 @@ paths:
       responses:
         '201':
           description: Plano criado com sucesso
-        '403':
-          description: Sem permissao
+        '400':
+          description: Valores fora dos limites da erva
 
   /planos/pendentes:
     get:
-      summary: Listar planos pontuais pendentes
+      summary: Listar planos pontuais pendentes (Responsavel ou Administrador)
+      tags: [Planos]
       security:
         - bearerAuth: []
       responses:
@@ -310,6 +444,7 @@ paths:
   /planos/{id}:
     get:
       summary: Ver plano por id
+      tags: [Planos]
       security:
         - bearerAuth: []
       parameters:
@@ -324,7 +459,8 @@ paths:
         '404':
           description: Plano nao encontrado
     put:
-      summary: Editar plano
+      summary: Editar plano (Responsavel ou Administrador)
+      tags: [Planos]
       security:
         - bearerAuth: []
       parameters:
@@ -345,7 +481,8 @@ paths:
         '404':
           description: Plano nao encontrado
     delete:
-      summary: Apagar plano
+      summary: Apagar plano (so Administrador)
+      tags: [Planos]
       security:
         - bearerAuth: []
       parameters:
@@ -362,7 +499,8 @@ paths:
 
   /planos/{id}/autorizar:
     put:
-      summary: Autorizar plano pontual
+      summary: Autorizar plano pontual (Responsavel ou Administrador)
+      tags: [Planos]
       security:
         - bearerAuth: []
       parameters:
@@ -378,3 +516,392 @@ paths:
           description: Plano nao e do tipo pontual
         '404':
           description: Plano nao encontrado
+
+  # ───── LOTES ─────
+
+  /lotes:
+    get:
+      summary: Listar todos os lotes
+      tags: [Lotes]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de lotes
+    post:
+      summary: Criar lote de cultivo
+      tags: [Lotes]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoteCultivo'
+      responses:
+        '201':
+          description: Lote criado com sucesso
+
+  /lotes/{id}:
+    get:
+      summary: Ver lote por id
+      tags: [Lotes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lote encontrado
+        '404':
+          description: Lote nao encontrado
+    put:
+      summary: Editar lote (Responsavel ou Administrador)
+      tags: [Lotes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoteCultivo'
+      responses:
+        '200':
+          description: Lote atualizado
+        '404':
+          description: Lote nao encontrado
+    delete:
+      summary: Apagar lote (so Administrador)
+      tags: [Lotes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lote apagado
+        '404':
+          description: Lote nao encontrado
+
+  /lotes/{id}/estado:
+    put:
+      summary: Atualizar estado do lote (Responsavel ou Administrador)
+      tags: [Lotes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                estado:
+                  type: string
+                  enum: [ativo, concluido, comprometido]
+                perdas:
+                  type: number
+                quantidadeFinal:
+                  type: number
+                dataFim:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Estado atualizado
+        '404':
+          description: Lote nao encontrado
+
+  # ───── TAREFAS ─────
+
+  /tarefas:
+    get:
+      summary: Listar todas as tarefas
+      tags: [Tarefas]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de tarefas
+    post:
+      summary: Criar tarefa operacional
+      tags: [Tarefas]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tarefa'
+      responses:
+        '201':
+          description: Tarefa criada com sucesso
+
+  /tarefas/pendentes:
+    get:
+      summary: Listar tarefas pendentes
+      tags: [Tarefas]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de tarefas pendentes
+
+  /tarefas/lote/{loteId}:
+    get:
+      summary: Listar tarefas de um lote especifico
+      tags: [Tarefas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: loteId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de tarefas do lote
+
+  /tarefas/{id}/executar:
+    put:
+      summary: Marcar tarefa como executada
+      tags: [Tarefas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tarefa marcada como executada
+        '400':
+          description: Tarefa ja foi executada
+        '404':
+          description: Tarefa nao encontrada
+
+  /tarefas/{id}:
+    delete:
+      summary: Apagar tarefa (Responsavel ou Administrador)
+      tags: [Tarefas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tarefa apagada
+        '404':
+          description: Tarefa nao encontrada
+
+  # ───── MEDICOES ─────
+
+  /medicoes:
+    post:
+      summary: Registar medicao ambiental e gerar alertas automaticos
+      tags: [Medicoes]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicaoAmbiental'
+      responses:
+        '201':
+          description: Medicao registada, devolve medicao e alertas gerados
+        '500':
+          description: Erro ao registar medicao
+
+  /medicoes/lote/{loteId}:
+    get:
+      summary: Historico de medicoes de um lote
+      tags: [Medicoes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: loteId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de medicoes do lote
+
+  # ───── ALERTAS ─────
+
+  /alertas:
+    get:
+      summary: Listar todos os alertas
+      tags: [Alertas]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de alertas
+
+  /alertas/ativos:
+    get:
+      summary: Listar alertas ativos
+      tags: [Alertas]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de alertas ativos
+
+  /alertas/lote/{loteId}:
+    get:
+      summary: Listar alertas de um lote especifico
+      tags: [Alertas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: loteId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de alertas do lote
+
+  /alertas/{id}/resolver:
+    put:
+      summary: Resolver um alerta
+      tags: [Alertas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Alerta resolvido com sucesso
+        '400':
+          description: Alerta ja foi resolvido ou ignorado
+        '404':
+          description: Alerta nao encontrado
+
+  /alertas/{id}/ignorar:
+    put:
+      summary: Ignorar um alerta com justificacao obrigatoria
+      tags: [Alertas]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                justificacao:
+                  type: string
+      responses:
+        '200':
+          description: Alerta ignorado
+        '400':
+          description: Justificacao obrigatoria ou alerta ja tratado
+        '404':
+          description: Alerta nao encontrado
+
+  # ───── LOGS ─────
+
+  /logs:
+    get:
+      summary: Listar todos os logs de auditoria (so Administrador)
+      tags: [Logs]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de logs
+        '403':
+          description: Sem permissao
+    delete:
+      summary: Apagar todos os logs (so Administrador)
+      tags: [Logs]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Todos os logs apagados
+        '403':
+          description: Sem permissao
+
+  /logs/exportar:
+    get:
+      summary: Exportar logs em CSV (so Administrador)
+      tags: [Logs]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ficheiro CSV com os logs
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Sem permissao
+
+  /logs/{id}:
+    delete:
+      summary: Apagar um log especifico (so Administrador)
+      tags: [Logs]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Log apagado
+        '404':
+          description: Log nao encontrado
